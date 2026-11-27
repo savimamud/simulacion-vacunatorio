@@ -14,7 +14,7 @@ tp sim/
 ## Ejecutar (cada vez)
 
 ```bash
-cd "/Users/lujandelacuesta/tp sim"
+cd simulacion-vacunatorio
 ./ejecutar.sh
 ```
 
