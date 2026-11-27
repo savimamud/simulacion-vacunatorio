@@ -1,0 +1,9 @@
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+frontend/node_modules/
+frontend/dist/
+dist-package/
+.DS_Store
+*.zip
+.idea/
+.junie/

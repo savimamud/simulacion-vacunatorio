@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vacunatorio · Simulación TP5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="/assets/index-4jKGREXk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-UPlfFjJ9.css">
+</head>
+<body>
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <p>Procesando simulación…</p>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div>
+          <h1>Vacunatorio</h1>
+          <p>Simulación</p>
+        </div>
+      </div>
+      <div class="backend-pill">
+        <span id="backendStatus" class="status-dot"></span>
+        <span id="backendLabel">Verificando backend…</span>
+      </div>
+      <form id="paramsForm" class="params-form" novalidate>
+        <div class="accordion open">
+          <button type="button" class="accordion-trigger">General</button>
+          <div class="accordion-body">
+            <label>Tiempo máximo X (min)<input name="tiempo_max" type="number" value="480" min="1" required /></label>
+            <label>Máx. iteraciones<input name="max_iteraciones" type="number" value="100000" min="1" max="100000" required /></label>
+            <div class="row-2">
+              <label>Iteración j<input name="iteracion_inicio" type="number" value="1" min="1" required /></label>
+              <label>Mostrar i<input name="iteraciones_mostrar" type="number" value="13" min="1" required /></label>
+            </div>
+            <label>Semilla<input name="seed" type="number" value="42" /></label>
+            <label class="checkbox"><input name="usar_rnds_fijos" type="checkbox" checked /> Usar RND fijos del .ods</label>
+            <label class="checkbox"><input name="mostrar_solo_filas_ods" type="checkbox" checked /> Mostrar solo las filas manuales del vector</label>
+            <input name="filas_ods" type="hidden" value="13" />
+          </div>
+        </div>
+        <div class="accordion open">
+          <button type="button" class="accordion-trigger">Llegadas</button>
+          <div class="accordion-body">
+            <div class="row-2">
+              <label>COVID / 15 min<input name="covid_rate_per_15min" type="number" value="4" step="any" min="0.1" required /></label>
+              <label>Intervalo (min)<input name="covid_interval_minutes" type="number" value="15" min="1" required /></label>
+            </div>
+            <label>Gripe: media entre llegadas (min)<input name="gripe_mean_interarrival_min" type="number" value="5" step="any" min="0.1" required /></label>
+            <div class="row-2">
+              <label>Grupo mín.<input name="group_min" type="number" value="1" min="1" required /></label>
+              <label>Grupo máx.<input name="group_max" type="number" value="4" min="1" required /></label>
+            </div>
+          </div>
+        </div>
+        <div class="accordion">
+          <button type="button" class="accordion-trigger">Vacunas y enfermero</button>
+          <div class="accordion-body">
+            <div class="row-2">
+              <label>Caja COVID<input name="covid_box_size" type="number" value="5" min="1" required /></label>
+              <label>Mín. pac. COVID<input name="covid_min_patients_to_open" type="number" value="5" min="1" required /></label>
+            </div>
+            <label>Caja GRIPE<input name="gripe_box_size" type="number" value="10" min="1" required /></label>
+            <label>Segundos * N pacientes<input name="seconds_per_patient" type="number" value="22" min="1" required /></label>
+          </div>
+        </div>
+        <div class="accordion">
+          <button type="button" class="accordion-trigger">Vencimiento dosis Gripe (RK4)</button>
+          <div class="accordion-body">
+            <div class="row-2">
+              <label>A<input name="ode_a" type="number" value="41.4" step="any" min="0.0001" required /></label>
+              <label>B<input name="ode_b" type="number" value="0.0575" step="any" min="0.0001" required /></label>
+            </div>
+            <label>h<input name="ode_h" type="number" value="0.005" step="any" min="0.000001" required /></label>
+            <div class="row-2">
+              <label>t0<input name="ode_t0" type="number" value="0" step="any" required /></label>
+              <label>R0<input name="ode_r0" type="number" value="0.076" step="any" min="0" required /></label>
+            </div>
+          </div>
+        </div>
+        <div class="accordion">
+          <button type="button" class="accordion-trigger">Control de stock / interrupción</button>
+          <div class="accordion-body">
+            <label class="checkbox"><input name="control_stock_enabled" type="checkbox" checked /> Activar llegada de control de stock</label>
+            <div class="row-2">
+              <label>Media llegada (min)<input name="control_stock_mean_interarrival_min" type="number" value="20" min="1" required /></label>
+              <label>Duración (min)<input name="control_stock_duration_min" type="number" value="2" min="1" required /></label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Ejecutar simulación</button>
+        <button type="button" id="btnRK" class="btn btn-ghost">Solo Runge-Kutta</button>
+      </form>
+      <footer class="sidebar-footer"><strong>UTN FR Córdoba</strong><span>TP5 Grupo 8</span></footer>
+    </aside>
+    <main class="main-content">
+      <header class="top-bar"><div><h2>Panel de resultados</h2><p>Vector de estado, estadísticas y tablas Runge-Kutta</p></div></header>
+      <div id="welcomeState" class="welcome-state">
+        <div class="welcome-card">
+          <h3>Configurá los parámetros y ejecutá la simulación</h3>
+          <p>Se mostrarán:</p>
+          <ul class="feature-list">
+            <li>Hasta 100.000 iteraciones o tiempo X</li>
+            <li>Ventana de estado desde iteración j durante i pasos</li>
+            <li>Última fila y vector con todas las columnas</li>
+            <li>8 métricas del sistema</li>
+          </ul>
+        </div>
+      </div>
+      <div id="resultsPanel" class="results-panel hidden">
+        <div id="summaryBar" class="summary-bar"></div>
+        <nav class="tab-nav">
+          <button class="nav-tab active" data-tab="stats">Estadísticas</button>
+          <button class="nav-tab" data-tab="rk">Runge-Kutta</button>
+          <button class="nav-tab" data-tab="slice">Vector j..i</button>
+          <button class="nav-tab" data-tab="last">Última fila</button>
+        </nav>
+        <div id="pane-stats" class="tab-pane active"><section class="card"><h3>8 estadísticas</h3><div id="statsGrid" class="stats-grid"></div></section></div>
+        <div id="pane-rk" class="tab-pane"><section class="card"><h3>Runge-Kutta 4</h3><div id="rkEquation"></div><p id="rkMax"></p><div class="chart-box"><canvas id="rkChart"></canvas></div><div class="table-scroll"><table id="rkTable" class="data-table"><thead><tr><th>t</th><th>R</th><th>k1</th><th>k2</th><th>k3</th><th>k4</th><th>R(i+1)</th></tr></thead><tbody></tbody></table></div></section></div>
+        <div id="pane-slice" class="tab-pane"><section class="card"><h3>Vector j..i</h3><div id="stateSlice"></div></section></div>
+        <div id="pane-last" class="tab-pane"><section class="card"><h3>Última fila</h3><div id="stateLast"></div></section></div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
